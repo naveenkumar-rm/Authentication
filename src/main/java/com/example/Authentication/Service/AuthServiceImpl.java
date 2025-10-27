@@ -5,50 +5,59 @@ import com.example.Authentication.DTO.SignupDto;
 import com.example.Authentication.Model.Auth;
 import com.example.Authentication.Repository.AuthRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class AuthServiceImpl implements AuthService{
-    @Autowired
-    AuthRepo repo;
+public class AuthServiceImpl {
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private AuthRepo repo;
 
     @Autowired
-    BCryptPasswordEncoder bcryptEncoder;
+    private PasswordEncoder passwordEncoder;
 
-    @Override
-    public String createnewUser(SignupDto user) {
-
-        Optional<Auth> existingEmail=repo.findByEmail(user.getEmail());
-        System.out.println(existingEmail);
-        if(existingEmail.isPresent()){
-            return  "Email already exists";
+    public String createNewUser(SignupDto dto) {
+        // Check if email already exists
+        if (repo.findByEmail(dto.getEmail()).isPresent()) {
+            return "Email already registered!";
         }
-        String hashedpw=bcryptEncoder.encode(user.getPassword());
-        repo.createUser(user.getName(),user.getEmail(),user.getPassword(),user.getRole(),hashedpw);
-        System.out.println(hashedpw);
-        return "User Registered Successfully";
+
+        // Check if username already exists
+        if (repo.findByUsername(dto.getUsername()).isPresent()) {
+            return "Username already exists!";
+        }
+
+        // Hash password before saving
+        String hashed = passwordEncoder.encode(dto.getPassword());
+
+        // Create new user with hashed password
+        Auth newUser = new Auth(
+                dto.getName(),
+                dto.getEmail(),
+                dto.getUsername(),
+                hashed,
+                dto.getRole()
+        );
+
+        // Save user in database
+        repo.save(newUser);
+        return "Signup successful!";
     }
 
-    @Override
-    public String userLogin(LoginDto loginuser) {
-        Optional<Auth> existingUser=repo.findByEmail(loginuser.getEmail());
-        if(existingUser.isEmpty()) {
-            return "Useremail not found";
+    public String userLogin(LoginDto dto) {
+        Optional<Auth> userOpt = repo.findByUsername(dto.getUsername());
+        if (userOpt.isEmpty()) {
+            return "Invalid username!";
         }
 
-        Auth isExistinguser=existingUser.get();
-        if(passwordEncoder.matches(loginuser.getPw(),isExistinguser.getHpw())){
-            return "Login success";
+        Auth user = userOpt.get();
+        if (passwordEncoder.matches(dto.getPassword(), user.getHashedPassword())) {
+            return "Login successful! Welcome, " + user.getName();
+        } else {
+            return "Invalid password!";
         }
-            return "Password Mismatch";
-
-
     }
 }

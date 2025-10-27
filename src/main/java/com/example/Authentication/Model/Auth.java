@@ -1,36 +1,31 @@
 package com.example.Authentication.Model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
-@Table(name="AuthTable")
-//@AllArgsConstructor
-//@NoArgsConstructor
-//@Getter
-//@Setter
+@Table(name = "auth_table")
 public class Auth {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int id;
-    String name;
-    String email;
-    String password;
-    String hpw;
-    String role;
+    private int id;
+    private String name;
 
     public Auth() {
     }
 
-    public Auth(int id, String name, String email, String password, String hpw, String role) {
+    @Column(unique = true)
+    private String email;
+    private String username;
+    private String hashedPassword;
+    private String role;
+
+    public Auth(int id, String name, String email, String username, String hashedPassword, String role) {
         this.id = id;
         this.name = name;
         this.email = email;
-        this.password = password;
-        this.hpw = hpw;
+        this.username = username;
+        this.hashedPassword = hashedPassword;
         this.role = role;
     }
 
@@ -58,20 +53,20 @@ public class Auth {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
+    public String getUsername() {
+        return username;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getHpw() {
-        return hpw;
+    public String getHashedPassword() {
+        return hashedPassword;
     }
 
-    public void setHpw(String hpw) {
-        this.hpw = hpw;
+    public void setHashedPassword(String hashedPassword) {
+        this.hashedPassword = hashedPassword;
     }
 
     public String getRole() {
@@ -82,8 +77,6 @@ public class Auth {
         this.role = role;
     }
 
-
-
-
+    @Column(unique = true)
 
 }
