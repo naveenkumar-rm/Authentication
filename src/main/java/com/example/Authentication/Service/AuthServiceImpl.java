@@ -20,20 +20,17 @@ public class AuthServiceImpl {
     private PasswordEncoder passwordEncoder;
 
     public String createNewUser(SignupDto dto) {
-        // Check if email already exists
+
         if (repo.findByEmail(dto.getEmail()).isPresent()) {
             return "Email already registered!";
         }
 
-        // Check if username already exists
         if (repo.findByUsername(dto.getUsername()).isPresent()) {
             return "Username already exists!";
         }
 
-        // Hash password before saving
         String hashed = passwordEncoder.encode(dto.getPassword());
 
-        // Create new user with hashed password
         Auth newUser = new Auth(
                 dto.getName(),
                 dto.getEmail(),
@@ -42,7 +39,6 @@ public class AuthServiceImpl {
                 dto.getRole()
         );
 
-        // Save user in database
         repo.save(newUser);
         return "Signup successful!";
     }
